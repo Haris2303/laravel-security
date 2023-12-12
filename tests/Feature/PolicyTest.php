@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class PolicyTest extends TestCase
@@ -36,6 +37,25 @@ class PolicyTest extends TestCase
         $user = User::where('email', 'otong@localhost')->firstOrFail();
 
         $todo = Todo::first();
+
+        $this->assertTrue($user->can('view', $todo));
+        $this->assertTrue($user->can('update', $todo));
+        $this->assertTrue($user->can('delete', $todo));
+        $this->assertTrue($user->can('create', Todo::class));
+    }
+
+    public function testBefore()
+    {
+        $this->seed([UserSeeder::class, TodoSeeder::class]);
+
+        $todo = Todo::first();
+
+        $user = new User([
+            'name' => 'superadmin',
+            'email' => 'superadmin@localhost',
+            'password' => Hash::make('password')
+        ]);
+        $user->save();
 
         $this->assertTrue($user->can('view', $todo));
         $this->assertTrue($user->can('update', $todo));
